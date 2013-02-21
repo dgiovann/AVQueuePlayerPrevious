@@ -4,6 +4,16 @@
 //
 //  Created by Daniel Giovannelli on 2/18/13.
 //
+// This code is released under a 2-clause BSD license, as follows:
+/*Copyright (c) 2013, Daniel Giovannelli
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #import "AVQueuePlayerPrevious.h"
 
@@ -21,6 +31,13 @@
     if (self){
         self.itemsForPlayer = [NSMutableArray arrayWithArray:items];
         nowPlayingIndex = 0;
+        isCalledFromPlayPreviousItem = NO;
+        for (int songPointer = 0; songPointer < [items count]; songPointer++) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(songEnded:)
+                                                     name:AVPlayerItemDidPlayToEndTimeNotification
+                                                   object:[items objectAtIndex:songPointer]];
+        }
     }
     return self;
 }
@@ -37,6 +54,14 @@
 
 // NEW METHODS
 
+-(void)songEnded:(NSNotification *)notification {
+    // This method is called by NSNotificationCenter when a song finishes playing; all it does is increment
+    // nowPlayingIndex
+    if (nowPlayingIndex < [_itemsForPlayer count] - 1){
+        nowPlayingIndex++;
+    }
+}
+
 -(void)playPreviousItem
 {
     // This function is the meat of this library: it allows for going backwards in an AVQueuePlayer,
@@ -50,9 +75,11 @@
         [self seekToTime:kCMTimeZero toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
         int tempNowPlayingIndex = nowPlayingIndex;
         [self removeAllItems];
-        for (int i=nowPlayingIndex - 1; i < [_itemsForPlayer count]; i++) {
+        isCalledFromPlayPreviousItem = YES;
+        for (int i = tempNowPlayingIndex - 1; i < [_itemsForPlayer count]; i++) {
             [self insertItem:[_itemsForPlayer objectAtIndex:i] afterItem:nil];
         }
+        isCalledFromPlayPreviousItem = NO;
         // The temp index is necessary since removeAllItems resets the nowPlayingIndex
         nowPlayingIndex = tempNowPlayingIndex - 1;
         // Not a typo; see above comment
@@ -105,19 +132,30 @@
 {
     // The only addition this method makes to AVQueuePlayer is advancing the nowPlayingIndex by 1.
     [super advanceToNextItem];
-    nowPlayingIndex++;
+    if (nowPlayingIndex < [_itemsForPlayer count] - 1){
+        nowPlayingIndex++;
+    }
 }
-
 -(void)insertItem:(AVPlayerItem *)item afterItem:(AVPlayerItem *)afterItem
 {
     // This method calls the superclass to add the new item to the AVQueuePlayer, then adds that item to the
     // proper location in the itemsForPlayer array and increments the nowPlayingIndex if necessary.
     [super insertItem:item afterItem:afterItem];
-    if ([_itemsForPlayer indexOfObject:item] < nowPlayingIndex)
-    {
-        nowPlayingIndex++;
+    if (!isCalledFromPlayPreviousItem){
+        if ([_itemsForPlayer indexOfObject:item] < nowPlayingIndex)
+        {
+            nowPlayingIndex++;
+        }
     }
-    [_itemsForPlayer insertObject:afterItem atIndex:[_itemsForPlayer indexOfObject:item]];
+    if ([_itemsForPlayer containsObject:afterItem]){ // AfterItem is non-nil
+        if ([_itemsForPlayer indexOfObject:afterItem] < [_itemsForPlayer count] - 1){
+            [_itemsForPlayer insertObject:item atIndex:[_itemsForPlayer indexOfObject:afterItem] + 1];
+        } else {
+            [_itemsForPlayer addObject:item];
+        }
+    } else { // afterItem is nil
+        [_itemsForPlayer addObject:item];
+    }
 }
 
 @end
