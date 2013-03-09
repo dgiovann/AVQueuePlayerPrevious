@@ -4,16 +4,6 @@
 //
 //  Created by Daniel Giovannelli on 2/18/13.
 //
-// This code is released under a 2-clause BSD license, as follows:
-/*Copyright (c) 2013, Daniel Giovannelli
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 
 #import "AVQueuePlayerPrevious.h"
 
@@ -73,11 +63,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [self pause];
         // Note: it is necessary to have seekToTime called twice in this method, once before and once after re-making the area. If it is not present before, the player will resume from the same spot in the next song when the previous song finishes playing; if it is not present after, the previous song will be played from the same spot that the current song was on.
         [self seekToTime:kCMTimeZero toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+        // The next two lines are necessary since RemoveAllItems resets both the nowPlayingIndex and _itemsForPlayer
         int tempNowPlayingIndex = nowPlayingIndex;
+        NSMutableArray *tempPlaylist = [[NSMutableArray alloc]initWithArray:_itemsForPlayer];
         [self removeAllItems];
         isCalledFromPlayPreviousItem = YES;
-        for (int i = tempNowPlayingIndex - 1; i < [_itemsForPlayer count]; i++) {
-            [self insertItem:[_itemsForPlayer objectAtIndex:i] afterItem:nil];
+        for (int i = tempNowPlayingIndex - 1; i < [tempPlaylist count]; i++) {
+            [self insertItem:[tempPlaylist objectAtIndex:i] afterItem:nil];
         }
         isCalledFromPlayPreviousItem = NO;
         // The temp index is necessary since removeAllItems resets the nowPlayingIndex
@@ -108,6 +100,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // nowPlayingIndex to 0.
     [super removeAllItems];
     nowPlayingIndex = 0;
+    [_itemsForPlayer removeAllObjects];
 }
 
 -(void)removeItem:(AVPlayerItem *)item
@@ -156,6 +149,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     } else { // afterItem is nil
         [_itemsForPlayer addObject:item];
     }
+}
+
+-(int)getIndex
+{
+    // This method simple returns the now playing index
+    return nowPlayingIndex;
 }
 
 @end
