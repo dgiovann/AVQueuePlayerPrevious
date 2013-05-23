@@ -15,8 +15,7 @@
 
 -(id)initWithItems:(NSArray *)items
 {
-    // This function calls the constructor for AVQueuePlayer, then sets up the nowPlayingIndex to 0 and
-    // saves the array that the player was generated from as itemsForPlayer
+    // This function calls the constructor for AVQueuePlayer, then sets up the nowPlayingIndex to 0 and saves the array that the player was generated from as itemsForPlayer
     self = [super initWithItems:items];
     if (self){
         self.itemsForPlayer = [NSMutableArray arrayWithArray:items];
@@ -36,8 +35,7 @@
 {
     // This function just allocates space for, creates, and returns an AVQueuePlayerPrevious from an array.
     // Honestly I think having it is a bit silly, but since its present in AVQueuePlayer it needs to be
-    // overridden here to ensure compatability. If anyone has any insight on why this method exists at all,
-    // let me know.
+    // overridden here to ensure compatability.
     AVQueuePlayerPrevious *playerToReturn = [[AVQueuePlayerPrevious alloc] initWithItems:items];
     return playerToReturn;
 }
@@ -90,6 +88,12 @@
     } else {
         return NO;
     }
+}
+
+-(int)getIndex
+{
+    // This method simply returns the now playing index
+    return nowPlayingIndex;
 }
 
 // OVERRIDDEN AVQUEUEPLAYER METHODS
@@ -149,12 +153,6 @@
     } else { // afterItem is nil
         [_itemsForPlayer addObject:item];
     }
-}
-
--(int)getIndex
-{
-    // This method simple returns the now playing index
-    return nowPlayingIndex;
 }
 
 @end

@@ -9,8 +9,7 @@
 //
 //  IMPORTANT NOTE: This version of AVQueuePlayer assumes that ARC IS ENABLED. If ARC is NOT enabled and you
 //  use this library, you'll get memory leaks on the two fields that have been added to the class, int
-//  nowPlayingIndex and NSArray itemsForPlayer. If you're trying to use this in a project in which ARC is
-//  NOT ENABLED, use the class AVQueuePlayerPrevious_NO_ARC, available at github.com/dgiovann
+//  nowPlayingIndex and NSArray itemsForPlayer. 
 //
 //  Note also that this classrequires that the AVFoundation framework be included in your project.
 
@@ -27,12 +26,14 @@
 
 @property (nonatomic, strong) NSMutableArray *itemsForPlayer;
 
-// Two methods need to be added to the AVQueuePlayer: one which will play the last song in the queue, and one which will return if the queue is at the beginning (in case the user wishes to implement special behavior when a queue is at its first item).
+// Two methods need to be added to the AVQueuePlayer: one which will play the last song in the queue, and one which will return if the queue is at the beginning (in case the user wishes to implement special behavior when a queue is at its first item, such as restarting a song). A getIndex method to return the current index is also provided.
 -(void)playPreviousItem;
 -(Boolean)isAtBeginning;
+-(int)getIndex;
 
 // This notification is called whenever an item finishes playing; it advances the now playing index by 1.
 -(void)songEnded:(NSNotification *)notification;
+
 
 /* The following methods of AVQueuePlayer are overridden by AVQueuePlayerPrevious:
  – initWithItems: to keep track of the array used to create the player
@@ -43,6 +44,5 @@
  – removeItem:  to update the now playing index
  */
 
--(int)getIndex;
 
 @end
