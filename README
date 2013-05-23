@@ -10,6 +10,9 @@ This method pauses the AVQueuePlayer, clears the queue, and re-populates the que
 -(Boolean)isAtBeginning
 This method simply returns true if the player is playing its first item, and false if it is not.
 
+-(int)getIndex
+This method returns the index in the queue of the currently playing element.
+
 LICENSING INFORMATION: This code is released under a 2-clause BSD license. In a nutshell, that means that you're free to modify or use this code in any project you want (including commercial products). You don't need to release the code of any project in which you use this library and your code does not itself need to be licensed under the BSD license. However, you may not remove the license text from the source code of this library, and you must credit this library (and me, Daniel Giovannelli, as its creator) somewhere in the app. 
 
 Also, though it's not required, if you do wind up using this library feel free to drop me an email at dangiovannelli@gmail.com and let me know what you're using it for - I'm always interested in seeing how people use the things I make.
