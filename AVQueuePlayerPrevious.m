@@ -22,10 +22,10 @@
         nowPlayingIndex = 0;
         isCalledFromPlayPreviousItem = NO;
         for (int songPointer = 0; songPointer < [items count]; songPointer++) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(songEnded:)
-                                                     name:AVPlayerItemDidPlayToEndTimeNotification
-                                                   object:[items objectAtIndex:songPointer]];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(songEnded:)
+                                                         name:AVPlayerItemDidPlayToEndTimeNotification
+                                                       object:[items objectAtIndex:songPointer]];
         }
     }
     return self;
@@ -45,6 +45,7 @@
 -(void)songEnded:(NSNotification *)notification {
     // This method is called by NSNotificationCenter when a song finishes playing; all it does is increment
     // nowPlayingIndex
+    [self.delegate queuePlayerDidReceiveNotificationForSongIncrement:self];
     if (nowPlayingIndex < [_itemsForPlayer count] - 1){
         nowPlayingIndex++;
     }
@@ -140,9 +141,9 @@
     [super insertItem:item afterItem:afterItem];
     if (!isCalledFromPlayPreviousItem){
         if ([_itemsForPlayer indexOfObject:item] < nowPlayingIndex)
-        {
+            {
             nowPlayingIndex++;
-        }
+            }
     }
     if ([_itemsForPlayer containsObject:afterItem]){ // AfterItem is non-nil
         if ([_itemsForPlayer indexOfObject:afterItem] < [_itemsForPlayer count] - 1){

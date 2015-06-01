@@ -15,6 +15,12 @@
 
 #import <AVFoundation/AVFoundation.h>
 
+@class AVQueuePlayerPrevious;
+
+@protocol AVQueuePlayerPreviousDelegate <NSObject>
+-(void)queuePlayerDidReceiveNotificationForSongIncrement:(AVQueuePlayerPrevious*)previousPlayer;
+@end
+
 @interface AVQueuePlayerPrevious : AVQueuePlayer
 {
     // This is a flag used to mark whether an item being added to the queue is being added by playPreviousItem (which requires slightly different functionality then in the general case) or if it is being added by an external call
@@ -24,6 +30,7 @@
     int nowPlayingIndex;
 }
 
+@property (nonatomic, weak) id <AVQueuePlayerPreviousDelegate> delegate;
 @property (nonatomic, strong) NSMutableArray *itemsForPlayer;
 
 // Two methods need to be added to the AVQueuePlayer: one which will play the last song in the queue, and one which will return if the queue is at the beginning (in case the user wishes to implement special behavior when a queue is at its first item, such as restarting a song). A getIndex method to return the current index is also provided.
