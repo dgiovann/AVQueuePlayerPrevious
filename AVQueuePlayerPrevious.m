@@ -13,6 +13,16 @@
 
 // CONSTRUCTORS
 
+-(id) init{
+  self = [super init];
+  if(self){
+    self.itemsForPlayer = [NSMutableArray arrayWithArray:nil];
+    nowPlayingIndex = 0;
+    isCalledFromPlayPreviousItem = NO;
+  }
+  return self;
+}
+
 -(id)initWithItems:(NSArray *)items
 {
     // This function calls the constructor for AVQueuePlayer, then sets up the nowPlayingIndex to 0 and saves the array that the player was generated from as itemsForPlayer
